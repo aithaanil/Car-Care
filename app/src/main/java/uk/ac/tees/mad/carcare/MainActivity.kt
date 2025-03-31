@@ -1,6 +1,10 @@
 package uk.ac.tees.mad.carcare
 
 import android.animation.ObjectAnimator
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.animation.OvershootInterpolator
@@ -12,6 +16,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        createNotificationChannel(this)
         super.onCreate(savedInstanceState)
         installSplashScreen().apply {
 //            setKeepOnScreenCondition {
@@ -41,5 +46,19 @@ class MainActivity : ComponentActivity() {
         setContent {
             CarCareApp()
         }
+    }
+}
+
+fun createNotificationChannel(context: Context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val name = "Appointment Channel"
+        val descriptionText = "Channel for Appointment notifications"
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel("appointment_channel", name, importance).apply {
+            description = descriptionText
+        }
+        val notificationManager: NotificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 }

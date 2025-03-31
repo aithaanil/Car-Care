@@ -1,7 +1,9 @@
 package uk.ac.tees.mad.carcare.ui.screens.booking
 
+import android.content.Context
 import android.icu.util.Calendar
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -61,6 +63,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import org.koin.androidx.compose.koinViewModel
@@ -73,6 +77,7 @@ import uk.ac.tees.mad.carcare.ui.util.CarCareScreen
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -206,6 +211,7 @@ fun BookingScreen(
                     }, confirmButton = { })
                 }
                 is FirestoreResult.Success ->{
+                    showNotification(context, "Appointment Booked on $formattedDate at $formattedTime")
                     navigate(Dest.AppointmentConfirmationScreen(onSuccessAppointmentId))
                     viewmodel.toggleShowBookingDialog()
                 }
@@ -452,6 +458,21 @@ fun BookingScreen(
             item{
                 Spacer(modifier = Modifier.height(100.dp))
             }
+        }
+    }
+}
+
+fun showNotification(context: Context, message: String) {
+    val builder = NotificationCompat.Builder(context, "appointment_channel")
+        .setSmallIcon(R.drawable.carcareapp_logo).setContentTitle("Appintment Booked")
+        .setContentText(message).setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+    with(NotificationManagerCompat.from(context)) {
+        try {
+            val notificationId = Random.nextInt()
+            notify(notificationId, builder.build())
+        } catch (e: SecurityException) {
+            Log.e("Notification", "Notification permission not granted: ${e.message}")
         }
     }
 }
