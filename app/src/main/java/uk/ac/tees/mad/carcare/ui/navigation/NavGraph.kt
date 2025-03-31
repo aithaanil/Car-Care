@@ -31,7 +31,7 @@ sealed class Dest {
     data object BookingScreen : Dest()
 
     @Serializable
-    data object AppointmentConfirmationScreen : Dest()
+    data class AppointmentConfirmationScreen(val appointmentId: String) : Dest()
 
     @Serializable
     data object AppointmentHistoryScreen : Dest()

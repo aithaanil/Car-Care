@@ -3,7 +3,9 @@ package uk.ac.tees.mad.carcare.ui.navigation
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import androidx.navigation.toRoute
 import uk.ac.tees.mad.carcare.ui.screens.booking.BookingScreen
+import uk.ac.tees.mad.carcare.ui.screens.confirmpage.AppointmentConfirmationScreen
 import uk.ac.tees.mad.carcare.ui.screens.home.HomeScreen
 import uk.ac.tees.mad.carcare.ui.screens.login.LogInScreen
 import uk.ac.tees.mad.carcare.ui.screens.signup.SignUpScreen
@@ -36,11 +38,16 @@ fun NavGraphBuilder.CarCareGraph(appState: CarCareAppState) {
         composable<Dest.BookingScreen> {
             BookingScreen(
                 navigate = { route -> appState.navigate(route) },
+                openAndPopUp = { route, popUp -> appState.navigateAndPopUp(route, popUp) },
                 popUp = { appState.popUp() }
             )
         }
         composable<Dest.AppointmentConfirmationScreen> {
-            //AppointmentConfirmationScreen()
+            val args= it.toRoute<Dest.AppointmentConfirmationScreen>()
+            AppointmentConfirmationScreen(
+                popUp = { appState.popUp() },
+                appointmentId = args.appointmentId
+            )
         }
         composable<Dest.AppointmentHistoryScreen> {
             //AppointmentHistoryScreen()

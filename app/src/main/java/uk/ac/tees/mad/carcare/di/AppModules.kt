@@ -12,6 +12,7 @@ import uk.ac.tees.mad.carcare.model.repository.CarCareFirestoreRepository
 import uk.ac.tees.mad.carcare.model.utils.GoogleAuthUiClient
 import uk.ac.tees.mad.carcare.ui.screens.CarCareAppViewModel
 import uk.ac.tees.mad.carcare.ui.screens.booking.BookingScreenViewModel
+import uk.ac.tees.mad.carcare.ui.screens.confirmpage.AppointmentConfirmationScreenViewModel
 import uk.ac.tees.mad.carcare.ui.screens.home.HomeScreenViewModel
 import uk.ac.tees.mad.carcare.ui.screens.login.LogInScreenViewModel
 import uk.ac.tees.mad.carcare.ui.screens.signup.SignUpScreenViewModel
@@ -44,6 +45,7 @@ val appModule = module {
     viewModelOf(::CarCareAppViewModel)
     viewModelOf(::HomeScreenViewModel)
     viewModelOf(::BookingScreenViewModel)
+    viewModelOf(::AppointmentConfirmationScreenViewModel)
 
 }
 

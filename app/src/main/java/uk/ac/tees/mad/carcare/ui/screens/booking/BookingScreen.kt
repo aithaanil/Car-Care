@@ -21,11 +21,16 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.BookOnline
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,6 +41,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TimeInput
 import androidx.compose.material3.TimePicker
@@ -50,13 +56,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import org.koin.androidx.compose.koinViewModel
 import uk.ac.tees.mad.carcare.R
+import uk.ac.tees.mad.carcare.model.dataclass.firebase.FirestoreResult
+import uk.ac.tees.mad.carcare.model.utils.ImageFileProvider
 import uk.ac.tees.mad.carcare.ui.navigation.Dest
 import uk.ac.tees.mad.carcare.ui.screens.home.HomeScreenViewModel
 import uk.ac.tees.mad.carcare.ui.util.CarCareScreen
@@ -69,6 +79,7 @@ import java.util.Locale
 fun BookingScreen(
     modifier: Modifier = Modifier,
     navigate: (Any) -> Unit,
+    openAndPopUp: (Any, Any) -> Unit,
     popUp: () -> Unit,
     viewmodel: BookingScreenViewModel = koinViewModel<BookingScreenViewModel>()
 ) {
@@ -114,6 +125,15 @@ fun BookingScreen(
             hasImage = uri != null
             imageUri = uri
         })
+    val context = LocalContext.current
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(), onResult = { success ->
+            hasImage = success
+        })
+
+    val showBookingDialog by viewmodel.showBookingDialog.collectAsStateWithLifecycle()
+    val bookingState by viewmodel.bookingState.collectAsStateWithLifecycle()
+    val onSuccessAppointmentId by viewmodel.onSuccessAppointmentId.collectAsStateWithLifecycle()
 
     CarCareScreen(
         title = stringResource(id = R.string.book_service),
@@ -121,6 +141,77 @@ fun BookingScreen(
         navigate = navigate,
         showBackArrow = true
     ) { innerModifier ->
+
+        if(showBookingDialog){
+            when(val state = bookingState){
+                is FirestoreResult.Error ->{
+                    AlertDialog(icon = {
+                        Icon(
+                            Icons.Default.Error,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }, title = {
+                        Text(
+                            text = "Error",
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }, text = {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = state.exception.message.toString(),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }, confirmButton = {
+                        TextButton(onClick = {
+                            viewmodel.toggleShowBookingDialog()
+                        }) {
+                            Text(text = "Retry?", fontWeight = FontWeight.Bold)
+                        }
+                    }, onDismissRequest = {
+                        viewmodel.toggleShowBookingDialog()
+                    })
+                }
+                FirestoreResult.Loading ->{
+                    AlertDialog(onDismissRequest = {
+                        viewmodel.toggleShowBookingDialog()
+                    }, icon = {
+                        Icon(
+                            Icons.Default.BookOnline,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }, title = {
+                        Text(
+                            text = "Booking...",
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }, text = {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .align(Alignment.CenterHorizontally)
+                            )
+                        }
+                    }, confirmButton = { })
+                }
+                is FirestoreResult.Success ->{
+                    navigate(Dest.AppointmentConfirmationScreen(onSuccessAppointmentId))
+                    viewmodel.toggleShowBookingDialog()
+                }
+            }
+        }
+
         LazyColumn(
             modifier = innerModifier,
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -319,7 +410,13 @@ fun BookingScreen(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ){
-                    Button(onClick = { /* Handle open camera button click */ }) {
+                    Button(onClick = {
+                        hasImage = false
+                        imageUri = null
+                        val uri = ImageFileProvider.getImageUri(context)
+                        imageUri = uri
+                        cameraLauncher.launch(uri)
+                    }) {
                         Icon(imageVector = Icons.Default.AddAPhoto, contentDescription = "Open Camera")
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Open Camera")
@@ -341,6 +438,7 @@ fun BookingScreen(
                     enabled = formattedDate != "No Date Selected",
                     onClick = {
                         viewmodel.bookService()
+                        viewmodel.toggleShowBookingDialog()
                     },
                     modifier = Modifier
                         .fillMaxWidth()

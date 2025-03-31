@@ -59,6 +59,15 @@ class BookingScreenViewModel(
     private val _userData = MutableStateFlow(UserData())
     val userData: StateFlow<UserData> = _userData.asStateFlow()
 
+    private val _showBookingDialog = MutableStateFlow(false)
+    val showBookingDialog: StateFlow<Boolean> = _showBookingDialog.asStateFlow()
+
+    private val _bookingState = MutableStateFlow<FirestoreResult<Any>>(FirestoreResult.Loading)
+    val bookingState: StateFlow<FirestoreResult<Any>> = _bookingState.asStateFlow()
+
+    private val _onSuccessAppointmentId = MutableStateFlow<String>("")
+    val onSuccessAppointmentId: StateFlow<String> = _onSuccessAppointmentId.asStateFlow()
+
     init {
         fetchUserDetails()
     }
@@ -84,15 +93,18 @@ class BookingScreenViewModel(
         carCareFirestoreRepository.addAppointment(userData.value.userId!!,_appointment.value!!).collectLatest {firestoreResult->
             when (firestoreResult) {
                 is FirestoreResult.Error -> {
+                    _bookingState.value = FirestoreResult.Error(firestoreResult.exception)
                     Log.e(
                         "CarCareAppointmentFirestore",
                         "Error adding Appointment to Firestore"
                     )
                 }
                 is FirestoreResult.Loading -> {
-
+                    _bookingState.value = FirestoreResult.Loading
                 }
                 is FirestoreResult.Success -> {
+                    _onSuccessAppointmentId.value = firestoreResult.data
+                    _bookingState.value = FirestoreResult.Success(firestoreResult.data)
                     Log.d(
                         "CarCareAppointmentFirestore",
                         "Successfully added Appointment, firestoreId: ${firestoreResult.data}"
@@ -149,5 +161,9 @@ class BookingScreenViewModel(
 
     fun updateImage(image: String) {
         _image.value = image
+    }
+
+    fun toggleShowBookingDialog(){
+        _showBookingDialog.value = !_showBookingDialog.value
     }
 }
