@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -103,6 +102,7 @@ fun LogInScreen(
     LaunchedEffect(key1 = signInState.isSignInSuccessful) {
         if (signInState.isSignInSuccessful) {
             openAndPopUp(SubGraph.HomeGraph, SubGraph.AuthGraph)
+            viewmodel.startSync()
             viewmodel.resetState()
         }
         if (signInState.signInError != null) {
@@ -180,6 +180,7 @@ fun LogInScreen(
 
             is AuthResult.Success -> {
                 // Handle successful log in
+                viewmodel.startSync()
                 openAndPopUp(SubGraph.HomeGraph, SubGraph.AuthGraph)
 
             }

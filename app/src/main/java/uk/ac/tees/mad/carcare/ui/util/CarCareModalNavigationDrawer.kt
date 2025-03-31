@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
 import uk.ac.tees.mad.carcare.ui.navigation.Dest
 import uk.ac.tees.mad.carcare.ui.navigation.DrawerScreen
-import kotlin.collections.forEach
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,9 +31,7 @@ fun CarCareModalNavigationDrawer(
 ) {
     val scope = rememberCoroutineScope()
     ModalNavigationDrawer(
-        drawerState = drawerState,
-        modifier = Modifier.padding(innerPadding),
-        drawerContent = {
+        drawerState = drawerState, modifier = Modifier.padding(innerPadding), drawerContent = {
             ModalDrawerSheet {
                 Column {
                     drawerScreens.keys.forEach { screen ->
@@ -52,7 +49,6 @@ fun CarCareModalNavigationDrawer(
                     }
                 }
             }
-        },
-        content = content
+        }, content = content
     )
 }

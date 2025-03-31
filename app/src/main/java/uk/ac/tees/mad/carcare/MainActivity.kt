@@ -11,8 +11,13 @@ import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import uk.ac.tees.mad.carcare.ui.screens.profileandsettings.LocalIsDarkMode
+import uk.ac.tees.mad.carcare.ui.theme.CarCareTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,7 +49,15 @@ class MainActivity : ComponentActivity() {
         }
         enableEdgeToEdge()
         setContent {
-            CarCareApp()
+            val sharedPreferences = getSharedPreferences("app_settings", MODE_PRIVATE)
+            val isDarkMode = remember {
+                mutableStateOf(sharedPreferences.getBoolean("dark_mode", true))
+            }
+            CompositionLocalProvider(LocalIsDarkMode provides isDarkMode) {
+                CarCareTheme(darkTheme = isDarkMode.value) {
+                    CarCareApp()
+                }
+            }
         }
     }
 }

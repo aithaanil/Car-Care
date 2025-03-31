@@ -111,8 +111,8 @@ dependencies {
     implementation("androidx.compose.material3:material3-android:1.4.0-alpha10")
     implementation("androidx.compose.ui:ui:1.7.8")
 
-    // Cloudinary
-    implementation("com.cloudinary:kotlin-url-gen:1.10.0")
+    implementation("androidx.exifinterface:exifinterface:1.4.0")
+    implementation ("com.google.accompanist:accompanist-permissions:0.37.2")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

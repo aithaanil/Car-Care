@@ -3,4 +3,9 @@
     <string name="web_client_id">969133120118-4ajbdrcsn3fbka88q17a5j4b972vhuol.apps.googleusercontent.com</string>
     <string name="book_service">Book Service</string>
     <string name="appointment_confirmation">Appointment Confirmation</string>
+    <string name="appointment_history">Appointment History</string>
+    <string name="permission_rationale">Permission is required to access your storage and camera</string>
+    <string name="permission_storage_request">Permission is required to access storage</string>
+    <string name="permission_camera_request">Permission is required to access camera</string>
+    <string name="permission_request">Request Permission</string>
 </resources>

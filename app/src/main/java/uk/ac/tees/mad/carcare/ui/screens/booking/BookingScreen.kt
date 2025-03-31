@@ -23,7 +23,6 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.BookOnline
 import androidx.compose.material.icons.filled.Error
@@ -51,9 +50,9 @@ import androidx.compose.material3.TimePickerDisplayMode
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,7 +71,6 @@ import uk.ac.tees.mad.carcare.R
 import uk.ac.tees.mad.carcare.model.dataclass.firebase.FirestoreResult
 import uk.ac.tees.mad.carcare.model.utils.ImageFileProvider
 import uk.ac.tees.mad.carcare.ui.navigation.Dest
-import uk.ac.tees.mad.carcare.ui.screens.home.HomeScreenViewModel
 import uk.ac.tees.mad.carcare.ui.util.CarCareScreen
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -125,15 +123,19 @@ fun BookingScreen(
     var imageUri by remember {
         mutableStateOf<Uri?>(null)
     }
+    val context = LocalContext.current
     val imagePicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(), onResult = { uri ->
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
             hasImage = uri != null
             imageUri = uri
+            uri?.let { viewmodel.updateImage(it, context.contentResolver) }
         })
-    val context = LocalContext.current
     val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture(), onResult = { success ->
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { success ->
             hasImage = success
+            imageUri?.let { viewmodel.updateImage(it, context.contentResolver) }
         })
 
     val showBookingDialog by viewmodel.showBookingDialog.collectAsStateWithLifecycle()
@@ -147,9 +149,9 @@ fun BookingScreen(
         showBackArrow = true
     ) { innerModifier ->
 
-        if(showBookingDialog){
-            when(val state = bookingState){
-                is FirestoreResult.Error ->{
+        if (showBookingDialog) {
+            when (val state = bookingState) {
+                is FirestoreResult.Error -> {
                     AlertDialog(icon = {
                         Icon(
                             Icons.Default.Error,
@@ -184,7 +186,8 @@ fun BookingScreen(
                         viewmodel.toggleShowBookingDialog()
                     })
                 }
-                FirestoreResult.Loading ->{
+
+                FirestoreResult.Loading -> {
                     AlertDialog(onDismissRequest = {
                         viewmodel.toggleShowBookingDialog()
                     }, icon = {
@@ -210,8 +213,12 @@ fun BookingScreen(
                         }
                     }, confirmButton = { })
                 }
-                is FirestoreResult.Success ->{
-                    showNotification(context, "Appointment Booked on $formattedDate at $formattedTime")
+
+                is FirestoreResult.Success -> {
+                    showNotification(
+                        context,
+                        "Appointment Booked on $formattedDate at $formattedTime"
+                    )
                     navigate(Dest.AppointmentConfirmationScreen(onSuccessAppointmentId))
                     viewmodel.toggleShowBookingDialog()
                 }
@@ -222,28 +229,33 @@ fun BookingScreen(
             modifier = innerModifier,
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            item{
-                Text(text = "Select service",
+            item {
+                Text(
+                    text = "Select service",
                     style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp))
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
             }
             item {
                 ExposedDropdownMenuBox(
                     expanded = serviceMenuExpanded,
                     onExpandedChange = { viewmodel.serviceMenuToggle() },
-                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
                 ) {
                     TextField(
-                        modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
                         state = serviceTextFieldState,
                         readOnly = true,
                         lineLimits = TextFieldLineLimits.SingleLine,
                         label = { Text("Service") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = serviceMenuExpanded) }
-                    )
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = serviceMenuExpanded) })
                     ExposedDropdownMenu(
                         expanded = serviceMenuExpanded,
-                        onDismissRequest = { viewmodel.serviceMenuToggle()},
+                        onDismissRequest = { viewmodel.serviceMenuToggle() },
                     ) {
                         serviceOptions.forEach { option ->
                             DropdownMenuItem(
@@ -258,28 +270,33 @@ fun BookingScreen(
                     }
                 }
             }
-            item{
-                Text(text = "Select center",
+            item {
+                Text(
+                    text = "Select center",
                     style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp))
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
             }
             item {
                 ExposedDropdownMenuBox(
                     expanded = centerMenuExpanded,
                     onExpandedChange = { viewmodel.centerMenuToggle() },
-                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
                 ) {
                     TextField(
-                        modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
                         state = centerTextFieldState,
                         readOnly = true,
                         lineLimits = TextFieldLineLimits.SingleLine,
                         label = { Text("Center") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = centerMenuExpanded) }
-                    )
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = centerMenuExpanded) })
                     ExposedDropdownMenu(
                         expanded = centerMenuExpanded,
-                        onDismissRequest = { viewmodel.centerMenuToggle()},
+                        onDismissRequest = { viewmodel.centerMenuToggle() },
                     ) {
                         centerOptions.forEach { option ->
                             DropdownMenuItem(
@@ -294,12 +311,14 @@ fun BookingScreen(
                     }
                 }
             }
-            item{
-                Text(text = "Select date for service",
+            item {
+                Text(
+                    text = "Select date for service",
                     style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp))
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
             }
-            item{
+            item {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -310,49 +329,59 @@ fun BookingScreen(
                     )
                 }
             }
-            item{
-                Text(text = "Select time for service",
+            item {
+                Text(
+                    text = "Select time for service",
                     style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp))
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
             }
-            item{
+            item {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
                 ) {
                     Column(
-                        modifier = Modifier.fillMaxWidth().background(color = MaterialTheme.colorScheme.surfaceContainerHigh)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(color = MaterialTheme.colorScheme.surfaceContainerHigh)
                     ) {
-                        if (
-                            displayMode == TimePickerDisplayMode.Picker
-                        ) {
+                        if (displayMode == TimePickerDisplayMode.Picker) {
                             IconButton(
                                 onClick = {
                                     displayMode = TimePickerDisplayMode.Input
-                                },
-                                modifier = Modifier.align(Alignment.End)
+                                }, modifier = Modifier.align(Alignment.End)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Keyboard,
                                     contentDescription = "Switch to input mode",
                                 )
                             }
-                            TimePicker(state = timePickerState,
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp))
+                            TimePicker(
+                                state = timePickerState,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp)
+                            )
                         } else {
                             IconButton(
                                 onClick = {
                                     displayMode = TimePickerDisplayMode.Picker
-                                },
-                                modifier = Modifier.align(Alignment.End)
+                                }, modifier = Modifier.align(Alignment.End)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Schedule,
                                     contentDescription = "Switch to picker mode",
                                 )
                             }
-                            TimeInput(state = timePickerState,
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp))
+                            TimeInput(
+                                state = timePickerState,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp)
+                            )
                         }
 
                     }
@@ -362,22 +391,26 @@ fun BookingScreen(
                     )
                 }
             }
-            item{
-                Text(text = "Add problem description",
+            item {
+                Text(
+                    text = "Add problem description",
                     style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp))
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
             }
-            item{
+            item {
                 TextField(
                     value = problemDescription,
                     onValueChange = {
                         viewmodel.updateProblemDescription(it)
                     },
                     label = { Text("Problem Description") },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
                 )
             }
-            item{
+            item {
                 Text(
                     text = "Add photo",
                     style = MaterialTheme.typography.headlineMedium,
@@ -388,14 +421,18 @@ fun BookingScreen(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-                ){
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                ) {
                     Box(
-                        modifier = Modifier.fillMaxWidth().height(200.dp).background(color = MaterialTheme.colorScheme.surfaceContainerHigh),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .background(color = MaterialTheme.colorScheme.surfaceContainerHigh),
                         contentAlignment = Alignment.Center
-                    ){
+                    ) {
                         if (hasImage && imageUri != null) {
-                            viewmodel.updateImage(imageUri.toString())
                             AsyncImage(
                                 model = imageUri,
                                 modifier = Modifier.fillMaxSize(),
@@ -411,51 +448,63 @@ fun BookingScreen(
                             )
                         }
                     }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ){
-                    Button(onClick = {
-                        hasImage = false
-                        imageUri = null
-                        val uri = ImageFileProvider.getImageUri(context)
-                        imageUri = uri
-                        cameraLauncher.launch(uri)
-                    }) {
-                        Icon(imageVector = Icons.Default.AddAPhoto, contentDescription = "Open Camera")
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Open Camera")
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Button(onClick = {
+                            hasImage = false
+                            imageUri = null
+                            val uri = ImageFileProvider.getImageUri(context)
+                            imageUri = uri
+                            cameraLauncher.launch(uri)
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.AddAPhoto,
+                                contentDescription = "Open Camera"
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Open Camera")
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Button(onClick = { imagePicker.launch("image/*") }) {
+                            Icon(
+                                imageVector = Icons.Default.PhotoLibrary,
+                                contentDescription = "Get Image from Gallery"
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Get from Gallery")
+                        }
                     }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Button(onClick = { imagePicker.launch("image/*") }) {
-                        Icon(imageVector = Icons.Default.PhotoLibrary, contentDescription = "Get Image from Gallery")
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Get from Gallery")
-                    }
-                }
                 }
             }
-            item{
+            item {
                 Column(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-                ) {
-                Button(
-                    enabled = formattedDate != "No Date Selected",
-                    onClick = {
-                        viewmodel.bookService()
-                        viewmodel.toggleShowBookingDialog()
-                    },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally),
-                    shape = MaterialTheme.shapes.extraLarge
+                        .padding(horizontal = 16.dp)
                 ) {
-                    Text(text = "Book Service", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
-                }
+                    Button(
+                        enabled = formattedDate != "No Date Selected",
+                        onClick = {
+                            viewmodel.bookService()
+                            viewmodel.toggleShowBookingDialog()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterHorizontally),
+                        shape = MaterialTheme.shapes.extraLarge
+                    ) {
+                        Text(
+                            text = "Book Service",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
-            item{
+            item {
                 Spacer(modifier = Modifier.height(100.dp))
             }
         }

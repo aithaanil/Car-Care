@@ -15,11 +15,13 @@ import uk.ac.tees.mad.carcare.model.dataclass.firebase.AuthResult
 import uk.ac.tees.mad.carcare.model.dataclass.firebase.SignInResult
 import uk.ac.tees.mad.carcare.model.dataclass.firebase.SignInState
 import uk.ac.tees.mad.carcare.model.repository.AuthRepository
+import uk.ac.tees.mad.carcare.model.utils.AppointmentSynchronizer
 import uk.ac.tees.mad.carcare.model.utils.GoogleAuthUiClient
-import uk.ac.tees.mad.carcare.ui.screens.CarCareAppViewModel
 
 class LogInScreenViewModel(
-    private val authRepository: AuthRepository, private val googleAuthUiClient: GoogleAuthUiClient
+    private val authRepository: AuthRepository,
+    private val googleAuthUiClient: GoogleAuthUiClient,
+    private val appointmentSynchronizer: AppointmentSynchronizer
 ) : ViewModel() {
     private val _logInResult = MutableStateFlow<AuthResult<Boolean>>(AuthResult.Success(false))
     val logInResult: StateFlow<AuthResult<Boolean>> = _logInResult.asStateFlow()
@@ -59,6 +61,10 @@ class LogInScreenViewModel(
         authRepository.signIn(email, pass).onEach { result ->
             _logInResult.value = result
         }.launchIn(viewModelScope)
+    }
+
+    fun startSync() {
+        appointmentSynchronizer.startSync()
     }
 
     // New functions for Google Sign-In

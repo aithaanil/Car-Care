@@ -3,7 +3,6 @@ package uk.ac.tees.mad.carcare.ui.util
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -26,36 +25,31 @@ fun CarCareTopAppBar(
 ) {
     TopAppBar(
         title = {
-            Text(
-                title,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        },
-        navigationIcon = {
-            if (showBackArrow) {
-                IconButton(onClick = popUp) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back Button"
-                    )
-                }
-            } else{
-            IconButton(onClick = openDrawer) {
+        Text(
+            title, maxLines = 1, overflow = TextOverflow.Ellipsis
+        )
+    }, navigationIcon = {
+        if (showBackArrow) {
+            IconButton(onClick = popUp) {
                 Icon(
-                    imageVector = Icons.Filled.Menu,
-                    contentDescription = "Open Drawer"
-                )
-            }}
-        },
-        actions = {
-            IconButton(onClick = logOut) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Logout,
-                    contentDescription = "Logout Button"
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back Button"
                 )
             }
-        },
-        scrollBehavior = scrollBehavior
+        } else {
+            IconButton(onClick = openDrawer) {
+                Icon(
+                    imageVector = Icons.Filled.Menu, contentDescription = "Open Drawer"
+                )
+            }
+        }
+    }, actions = {
+        IconButton(onClick = logOut) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.Logout,
+                contentDescription = "Logout Button"
+            )
+        }
+    }, scrollBehavior = scrollBehavior
     )
 }

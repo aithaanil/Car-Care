@@ -1,5 +1,7 @@
 package uk.ac.tees.mad.carcare.ui.screens.splash
 
+import android.Manifest
+import android.os.Build
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -27,18 +29,40 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 import uk.ac.tees.mad.carcare.R
+import uk.ac.tees.mad.carcare.ui.navigation.Dest
 
 private const val SPLASH_TIMEOUT = 5000L
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun SplashScreen(
     openAndPopUp: (Any, Any) -> Unit,
+    navigate: (Any) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SplashViewModel = koinViewModel<SplashViewModel>()
 ) {
+    var multiplePermissionsState = rememberMultiplePermissionsState(
+        permissions = listOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+        )
+    )
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+        multiplePermissionsState = rememberMultiplePermissionsState(
+            permissions = listOf(
+                Manifest.permission.CAMERA,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.READ_MEDIA_IMAGES,
+                Manifest.permission.POST_NOTIFICATIONS,
+            )
+        )
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -51,10 +75,39 @@ fun SplashScreen(
         Splash()
     }
 
-    LaunchedEffect(true) {
-        delay(SPLASH_TIMEOUT)
-        viewModel.onAppStart(openAndPopUp)
+    LaunchedEffect(Unit) {
+        if (multiplePermissionsState.allPermissionsGranted) {
+            // All permissions granted
+            delay(SPLASH_TIMEOUT)
+            viewModel.onAppStart(openAndPopUp)
+        } else {
+            multiplePermissionsState.launchMultiplePermissionRequest()
+        }
     }
+
+    LaunchedEffect(multiplePermissionsState) {
+        if (multiplePermissionsState.allPermissionsGranted) {
+            // All permissions granted
+            delay(SPLASH_TIMEOUT)
+            viewModel.onAppStart(openAndPopUp)
+        } else {
+            navigate(Dest.LoadingErrorScreen("Permissions not granted. Please grant them."))
+        }
+    }
+
+//    if (multiplePermissionsState.allPermissionsGranted) {
+//        // Continue with the app flow
+//    } else {
+//        // Handle the case where permissions are not granted
+//        LaunchedEffect(Unit) {
+//            // Delay for a shorter time if permissions are not granted
+//            delay(SPLASH_TIMEOUT)
+//            // Navigate to a screen explaining the permissions and allowing the user to grant them
+//            // Or, you could just close the app
+//            navigate(Dest.LoadingErrorScreen("Permissions not granted. Please grant them."))
+//            //viewModel.openAuthGraph(openAndPopUp)
+//        }
+//    }
 }
 
 @Composable

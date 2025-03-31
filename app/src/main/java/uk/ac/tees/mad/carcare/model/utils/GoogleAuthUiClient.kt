@@ -33,10 +33,10 @@ class GoogleAuthUiClient(
 
     suspend fun signIn(): IntentSender? {
         val request = BeginSignInRequest.builder().setGoogleIdTokenRequestOptions(
-                GoogleIdTokenRequestOptions.builder().setSupported(true)
-                    .setServerClientId(context.getString(R.string.web_client_id))
-                    .setFilterByAuthorizedAccounts(false).build()
-            ).setAutoSelectEnabled(true).build()
+            GoogleIdTokenRequestOptions.builder().setSupported(true)
+                .setServerClientId(context.getString(R.string.web_client_id))
+                .setFilterByAuthorizedAccounts(false).build()
+        ).setAutoSelectEnabled(true).build()
         return try {
             Log.d(TAG, "signIn: ok")
             oneTapClient.beginSignIn(request).await().pendingIntent.intentSender
@@ -52,8 +52,7 @@ class GoogleAuthUiClient(
         } catch (e: ApiException) {
             Log.e(TAG, "signInWithIntent: ", e)
             return SignInResult(
-                data = null,
-                errorMessage = "Error getting credentials: ${e.message}"
+                data = null, errorMessage = "Error getting credentials: ${e.message}"
             )
         }
 

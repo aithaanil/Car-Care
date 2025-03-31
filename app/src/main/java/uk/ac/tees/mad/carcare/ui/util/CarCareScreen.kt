@@ -2,7 +2,6 @@ package uk.ac.tees.mad.carcare.ui.util
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BookOnline
 import androidx.compose.material.icons.filled.Dashboard
@@ -31,7 +30,7 @@ import uk.ac.tees.mad.carcare.ui.screens.CarCareAppViewModel
 @Composable
 fun CarCareScreen(
     title: String,
-    openAndPopUp: (Any, Any) -> Unit= { _, _ -> },
+    openAndPopUp: (Any, Any) -> Unit = { _, _ -> },
     navigate: (Any) -> Unit = {},
     popUp: () -> Unit = {},
     showBackArrow: Boolean = false,
@@ -45,29 +44,27 @@ fun CarCareScreen(
         DrawerScreen("Dashboard", Icons.Default.Dashboard) to Dest.HomeScreen,
         DrawerScreen("Book Service", Icons.Default.BookOnline) to Dest.BookingScreen,
         DrawerScreen("Appointment History", Icons.Default.History) to Dest.AppointmentHistoryScreen,
-        DrawerScreen("Profile & Settings", Icons.Default.ManageAccounts) to Dest.ProfileAndSettingsScreen,
+        DrawerScreen(
+            "Profile & Settings",
+            Icons.Default.ManageAccounts
+        ) to Dest.ProfileAndSettingsScreen,
     )
     val selectedItem = remember { mutableStateOf(drawerScreens.keys.first()) }
     val scope = rememberCoroutineScope()
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection), topBar = {
             CarCareTopAppBar(
-                title = title,
-                showBackArrow = showBackArrow,
-                openDrawer = { scope.launch {
-                    if(drawerState.isOpen) drawerState.close() else drawerState.open()
-                } },
-                popUp = popUp,
-                logOut = {
-                    viewModel.logOut()
-                    openAndPopUp(SubGraph.AuthGraph, SubGraph.HomeGraph)
-                },
-                scrollBehavior = scrollBehavior
+                title = title, showBackArrow = showBackArrow, openDrawer = {
+                scope.launch {
+                    if (drawerState.isOpen) drawerState.close() else drawerState.open()
+                }
+            }, popUp = popUp, logOut = {
+                viewModel.logOut()
+                openAndPopUp(SubGraph.AuthGraph, SubGraph.HomeGraph)
+            }, scrollBehavior = scrollBehavior
             )
-        },
-        contentWindowInsets = WindowInsets(0.dp)
+        }, contentWindowInsets = WindowInsets(0.dp)
     ) { innerPadding ->
         CarCareModalNavigationDrawer(
             drawerState = drawerState,

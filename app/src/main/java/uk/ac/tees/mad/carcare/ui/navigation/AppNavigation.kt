@@ -6,15 +6,25 @@ import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import uk.ac.tees.mad.carcare.ui.screens.booking.BookingScreen
 import uk.ac.tees.mad.carcare.ui.screens.confirmpage.AppointmentConfirmationScreen
+import uk.ac.tees.mad.carcare.ui.screens.history.AppointmentHistoryScreen
 import uk.ac.tees.mad.carcare.ui.screens.home.HomeScreen
 import uk.ac.tees.mad.carcare.ui.screens.login.LogInScreen
+import uk.ac.tees.mad.carcare.ui.screens.profileandsettings.ProfileAndSettingsScreen
 import uk.ac.tees.mad.carcare.ui.screens.signup.SignUpScreen
 import uk.ac.tees.mad.carcare.ui.screens.splash.SplashScreen
+import uk.ac.tees.mad.carcare.ui.util.LoadingErrorScreen
 
 fun NavGraphBuilder.CarCareGraph(appState: CarCareAppState) {
     navigation<SubGraph.SplashScreenGraph>(startDestination = Dest.SplashScreen) {
         composable<Dest.SplashScreen> {
-            SplashScreen(openAndPopUp = { route, popUp -> appState.navigateAndPopUp(route, popUp) })
+            SplashScreen(openAndPopUp = { route, popUp -> appState.navigateAndPopUp(route, popUp) },
+                navigate = { route -> appState.navigate(route) })
+        }
+        composable<Dest.LoadingErrorScreen> {
+            val args = it.toRoute<Dest.LoadingErrorScreen>()
+            LoadingErrorScreen(
+                errorMessage = args.errorMessage,
+                onRetry = { appState.clearAndNavigate(SubGraph.SplashScreenGraph) })
         }
     }
     navigation<SubGraph.AuthGraph>(startDestination = Dest.LogInScreen) {
@@ -32,28 +42,34 @@ fun NavGraphBuilder.CarCareGraph(appState: CarCareAppState) {
         composable<Dest.HomeScreen> {
             HomeScreen(
                 openAndPopUp = { route, popUp -> appState.navigateAndPopUp(route, popUp) },
-                navigate = { route -> appState.navigate(route) }
-            )
+                navigate = { route -> appState.navigate(route) })
         }
         composable<Dest.BookingScreen> {
             BookingScreen(
                 navigate = { route -> appState.navigate(route) },
                 openAndPopUp = { route, popUp -> appState.navigateAndPopUp(route, popUp) },
-                popUp = { appState.popUp() }
-            )
+                popUp = { appState.popUp() })
         }
         composable<Dest.AppointmentConfirmationScreen> {
-            val args= it.toRoute<Dest.AppointmentConfirmationScreen>()
+            val args = it.toRoute<Dest.AppointmentConfirmationScreen>()
             AppointmentConfirmationScreen(
-                popUp = { appState.popUp() },
-                appointmentId = args.appointmentId
+                popUp = { appState.popUp() }, appointmentId = args.appointmentId
             )
         }
         composable<Dest.AppointmentHistoryScreen> {
-            //AppointmentHistoryScreen()
+            AppointmentHistoryScreen(
+                popUp = { appState.popUp() },
+            )
         }
         composable<Dest.ProfileAndSettingsScreen> {
-            //ProfileAndSettingsScreen()
+            ProfileAndSettingsScreen(
+                openAndPopUp = { route, popUp ->
+                    appState.navigateAndPopUp(
+                        route,
+                        popUp
+                    )
+                },
+                popUp = { appState.popUp() })
         }
     }
 
