@@ -7,9 +7,11 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import uk.ac.tees.mad.carcare.model.repository.AuthRepository
+import uk.ac.tees.mad.carcare.model.repository.CarCareFirestoreRepository
 
 open class CarCareAppViewModel(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val carCareFirestoreRepository: CarCareFirestoreRepository
 ) : ViewModel() {
     fun launchCatching(block: suspend CoroutineScope.() -> Unit) = viewModelScope.launch(
         CoroutineExceptionHandler { _, throwable ->

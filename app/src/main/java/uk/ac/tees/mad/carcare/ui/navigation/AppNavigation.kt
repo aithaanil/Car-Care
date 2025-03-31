@@ -34,7 +34,10 @@ fun NavGraphBuilder.CarCareGraph(appState: CarCareAppState) {
             )
         }
         composable<Dest.BookingScreen> {
-            BookingScreen()
+            BookingScreen(
+                navigate = { route -> appState.navigate(route) },
+                popUp = { appState.popUp() }
+            )
         }
         composable<Dest.AppointmentConfirmationScreen> {
             //AppointmentConfirmationScreen()

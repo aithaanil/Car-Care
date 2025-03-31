@@ -88,6 +88,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
     // Credential Manager libraries and specify their versions
     implementation("com.google.android.gms:play-services-auth:21.3.0")
     implementation("androidx.credentials:credentials:1.3.0")
@@ -106,9 +107,12 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     // Material 3
-    implementation("androidx.compose.material3:material3:1.3.1")
-    implementation("androidx.compose.material3:material3-android:1.3.1")
+    implementation("androidx.compose.material3:material3:1.4.0-alpha10")
+    implementation("androidx.compose.material3:material3-android:1.4.0-alpha10")
     implementation("androidx.compose.ui:ui:1.7.8")
+
+    // Cloudinary
+    implementation("com.cloudinary:kotlin-url-gen:1.10.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
